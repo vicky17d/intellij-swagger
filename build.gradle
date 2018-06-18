@@ -20,7 +20,7 @@ task wrapper(type: Wrapper) {
 
 intellij {
     plugins 'yaml' //Bundled plugin dependencies
-    pluginName 'intellij-swagger'
+    pluginName 'gw-custom-intellij-swagger'
     updateSinceUntilBuild false
     version '2016.2'
 }

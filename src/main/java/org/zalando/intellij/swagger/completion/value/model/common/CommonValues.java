@@ -1,8 +1,11 @@
 package org.zalando.intellij.swagger.completion.value.model.common;
 
 import com.google.common.collect.ImmutableList;
+import org.extensionPoints.CustomFormatValues;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CommonValues {
 
@@ -24,7 +27,7 @@ public class CommonValues {
         );
     }
 
-    public static List<Value> formats() {
+    private static List<Value> outOfTheBoxFormats() {
         return ImmutableList.of(
                 new StringValue("int32"),
                 new StringValue("int64"),
@@ -38,5 +41,12 @@ public class CommonValues {
                 new StringValue("email"),
                 new StringValue("uuid")
         );
+    }
+    
+    public static List<Value> formats() {
+        return new ImmutableList.Builder<Value>()
+                .addAll(outOfTheBoxFormats())
+                .addAll(Arrays.stream(CustomFormatValues.EP_NAME.getExtensions()).flatMap(customFormatValues -> customFormatValues.getCustomFormatValues().stream()).collect(Collectors.toList()))
+                .build();
     }
 }

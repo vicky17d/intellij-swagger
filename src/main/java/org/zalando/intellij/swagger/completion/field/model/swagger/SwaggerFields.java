@@ -2,14 +2,19 @@ package org.zalando.intellij.swagger.completion.field.model.swagger;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.http.HttpHeaders;
+import org.extensionPoints.CustomFields;
+import org.extensionPoints.CustomFieldsEP;
 import org.zalando.intellij.swagger.completion.field.model.common.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SwaggerFields {
 
     public static List<Field> root() {
-        return ImmutableList.of(
+
+        List<Field> outOfTheBox = Arrays.asList(
                 new StringField("swagger", true),
                 new InfoField(),
                 new StringField("host"),
@@ -24,12 +29,30 @@ public class SwaggerFields {
                 new ObjectField("securityDefinitions"),
                 new ArrayField("security"),
                 new ArrayField("tags"),
-                new ExternalDocsField()
-        );
+                new ExternalDocsField());
+        
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("root"))
+                .build();
+    }
+
+    private static List<Field> customFields(String key) {
+
+        CustomFields impl;
+        List<Field> customFields = new ArrayList<>();
+        final CustomFieldsEP<CustomFields>[] eps = CustomFields.EP_NAME.getExtensions(); 
+        for (CustomFieldsEP<CustomFields> ep : eps) {
+            if (ep.key.equals(key)) {
+                impl = ep.getInstance();
+                customFields.addAll(impl.getCustomFields());
+            }
+        }
+        return customFields;
     }
 
     public static List<Field> schema() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new RefField(),
                 new StringField("format"),
                 new StringField("title"),
@@ -61,14 +84,21 @@ public class SwaggerFields {
                 new ExternalDocsField(),
                 new ObjectField("example")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("schema"))
+                .build();
     }
 
     public static List<Field> schemaItems() {
-        return schema();
+        return new ImmutableList.Builder<Field>()
+                .addAll(schema())
+                .addAll(customFields("schemaItems"))
+                .build();
     }
 
     public static List<Field> header() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new StringField("description"),
                 new StringField("type", true),
                 new StringField("format"),
@@ -88,10 +118,14 @@ public class SwaggerFields {
                 new ArrayField("enum"),
                 new StringField("multipleOf")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("header"))
+                .build();
     }
 
     public static List<Field> parameterItems() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new StringField("type", true),
                 new StringField("format"),
                 new ParameterItemsField(),
@@ -110,10 +144,14 @@ public class SwaggerFields {
                 new ArrayField("enum"),
                 new StringField("multipleOf")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("paramItems"))
+                .build();
     }
 
     public static List<Field> operation() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new ArrayField("tags"),
                 new StringField("summary"),
                 new StringField("description"),
@@ -127,10 +165,14 @@ public class SwaggerFields {
                 new StringField("deprecated"),
                 new ArrayField("security")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("operation"))
+                .build();
     }
 
     public static List<Field> parameters() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new StringField("name", true),
                 new StringField("in", true),
                 new StringField("description"),
@@ -155,10 +197,14 @@ public class SwaggerFields {
                 new ArrayField("enum"),
                 new StringField("multipleOf")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("parameters"))
+                .build();
     }
 
     public static List<Field> parametersWithRef() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new RefField(),
                 new StringField("name", true),
                 new StringField("in", true),
@@ -184,10 +230,14 @@ public class SwaggerFields {
                 new ArrayField("enum"),
                 new StringField("multipleOf")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("parameterWithRef"))
+                .build();
     }
 
     public static List<Field> path() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new RefField(),
                 new OperationField("get"),
                 new OperationField("put"),
@@ -198,29 +248,41 @@ public class SwaggerFields {
                 new OperationField("patch"),
                 new ArrayField("parameters")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("path"))
+                .build();
     }
 
     public static List<Field> response() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new RefField(),
                 new StringField("description", true),
                 new ObjectField("schema"),
                 new ObjectField("headers"),
                 new ObjectField("examples")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("response"))
+                .build();
     }
 
     public static List<Field> responseDefinition() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new StringField("description", true),
                 new ObjectField("schema"),
                 new ObjectField("headers"),
                 new ObjectField("examples")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("responseDefinition"))
+                .build();
     }
 
     public static List<Field> securityDefinitions() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new StringField("type", true),
                 new StringField("description"),
                 new StringField("name", true),
@@ -230,20 +292,28 @@ public class SwaggerFields {
                 new StringField("tokenUrl", true),
                 new ObjectField("scopes", true)
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("securityDefinitions"))
+                .build();
     }
 
     public static List<Field> xml() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new StringField("name"),
                 new StringField("namespace"),
                 new StringField("prefix"),
                 new StringField("attribute"),
                 new StringField("wrapped")
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("xml"))
+                .build();
     }
 
     public static List<Field> headers() {
-        return ImmutableList.of(
+        List<Field> outOfTheBox = Arrays.asList(
                 new HeadersField(HttpHeaders.ACCEPT),
                 new HeadersField(HttpHeaders.ACCEPT_CHARSET),
                 new HeadersField(HttpHeaders.ACCEPT_ENCODING),
@@ -300,5 +370,9 @@ public class SwaggerFields {
                 new HeadersField(HttpHeaders.WARNING),
                 new HeadersField(HttpHeaders.WWW_AUTHENTICATE)
         );
+        return new ImmutableList.Builder<Field>()
+                .addAll(outOfTheBox)
+                .addAll(customFields("headers"))
+                .build();
     }
 }

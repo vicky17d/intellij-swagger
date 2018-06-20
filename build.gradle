@@ -13,6 +13,7 @@ plugins {
 apply plugin: 'idea'
 apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.12'

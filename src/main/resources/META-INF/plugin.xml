@@ -19,10 +19,19 @@
     
     <extensionPoints>
         <extensionPoint qualifiedName="org.gw.swagger.customFormatValues" interface="org.extensionPoints.CustomFormatValues"/>
+        <extensionPoint qualifiedName="org.gw.swagger.customFields" beanClass="org.extensionPoints.CustomFieldsEP">
+            <with attribute="implementationClass" implements="org.extensionPoints.CustomFields"/>
+        </extensionPoint>
+        <extensionPoint qualifiedName="org.gw.swagger.customValues" beanClass="org.extensionPoints.CustomValuesEP">
+            <with attribute="implementationClass" implements="org.extensionPoints.CustomValues"/>
+        </extensionPoint>
     </extensionPoints>
 
     <extensions defaultExtensionNs="org.gw.swagger">
-        <customFormatValues implementation="org.extensionPoints.CustomFormatValuesImpl"/>
+        <customFields implementationClass="org.extensionPoints.testExtensions.customFields.CustomRootFieldsImpl" key="root"/>
+        <customFields implementationClass="org.extensionPoints.testExtensions.customFields.CustomOperationFieldsImpl" key="operation"/>
+        <customValues implementationClass="org.extensionPoints.testExtensions.customValues.CustomFormatValuesImpl" key="format"/>
+        <customValues implementationClass="org.extensionPoints.testExtensions.customValues.CustomTypeValuesImpl" key="type"/>
     </extensions>
     
 

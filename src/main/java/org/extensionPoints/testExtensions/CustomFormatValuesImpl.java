@@ -1,6 +1,7 @@
-package org.extensionPoints;
+package org.extensionPoints.testExtensions;
 
 import com.google.common.collect.ImmutableList;
+import org.extensionPoints.CustomFormatValues;
 import org.zalando.intellij.swagger.completion.value.model.common.StringValue;
 import org.zalando.intellij.swagger.completion.value.model.common.Value;
 

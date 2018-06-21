@@ -7,7 +7,7 @@ import org.zalando.intellij.swagger.traversal.path.swagger.PathResolver;
 public class SwaggerCompletionHelper extends CompletionHelper {
 
     private final PathResolver pathResolver;
-
+    
     public SwaggerCompletionHelper(final PsiElement psiElement,
                                    final Traversal traversal,
                                    final PathResolver pathResolver) {

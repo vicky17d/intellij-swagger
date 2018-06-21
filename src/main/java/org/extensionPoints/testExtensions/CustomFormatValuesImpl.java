@@ -7,6 +7,7 @@ import org.zalando.intellij.swagger.completion.value.model.common.Value;
 
 import java.util.List;
 
+//todo vd to be removed
 public class CustomFormatValuesImpl extends CustomFormatValues {
   @Override
   public List<Value> getCustomFormatValues() {

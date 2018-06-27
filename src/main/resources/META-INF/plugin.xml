@@ -20,6 +20,11 @@
         <extensionPoint qualifiedName="org.zalando.intellij.swagger.customFieldFactory" interface="org.zalando.intellij.swagger.extensions.completion.swagger.SwaggerCustomFieldCompletionFactory"/>
         <extensionPoint qualifiedName="org.zalando.intellij.swagger.customValueFactory" interface="org.zalando.intellij.swagger.extensions.completion.swagger.SwaggerCustomValueCompletionFactory"/>
     </extensionPoints>
+
+    <extensions defaultExtensionNs="org.zalando.intellij.swagger">
+        <customValueFactory implementation="org.zalando.intellij.swagger.extensions.completion.swagger.SwaggerCustomValueCompletionFactoryImpl"/>
+        <customFieldFactory implementation="org.zalando.intellij.swagger.extensions.completion.swagger.SwaggerCustomFieldCompletionFactoryImpl"/>
+    </extensions>
     
     <extensions defaultExtensionNs="com.intellij">
         <completion.contributor language="JSON" implementationClass="org.zalando.intellij.swagger.completion.contributor.swagger.SwaggerJsonCompletionContributor"/>

@@ -22,6 +22,15 @@
         <extensionPoint qualifiedName="org.zalando.intellij.swagger.customSwaggerJsonKeyFactory" interface="org.zalando.intellij.swagger.extensions.completion.swagger.SwaggerJsonCustomKeyCompletionFactory"/>
         <extensionPoint qualifiedName="org.zalando.intellij.swagger.customSwaggerJsonValueFactory" interface="org.zalando.intellij.swagger.extensions.completion.swagger.SwaggerJsonCustomValueCompletionFactory"/>
     </extensionPoints>
+
+    <extensions defaultExtensionNs="org.zalando.intellij.swagger">
+        <customValueFactory implementation="testPackage.SwaggerCustomValueCompletionFactoryImpl"/>
+        <customFieldFactory implementation="testPackage.SwaggerCustomFieldCompletionFactoryImpl"/>
+        
+        <customSwaggerJsonKeyFactory implementation="testPackage.SwaggerJsonCustomFieldCompletionFactoryImpl"/>
+        <customSwaggerJsonValueFactory implementation="testPackage.SwaggerJsonCustomValueCompletionFactoryImpl"/>
+    </extensions>
+    
     
     <extensions defaultExtensionNs="com.intellij">
         <completion.contributor language="JSON" implementationClass="org.zalando.intellij.swagger.completion.contributor.swagger.SwaggerJsonCompletionContributor"/>

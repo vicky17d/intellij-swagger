@@ -23,8 +23,10 @@ public class YamlReferenceContributor extends ReferenceContributor {
     @Override
     public void registerReferenceProviders(@NotNull final PsiReferenceRegistrar registrar) {
         registrar.registerReferenceProvider(localDefinitionsPattern(), createLocalReferenceProvider());
+        registrar.registerReferenceProvider(localDefinitionsPattern2(), createLocalReferenceProvider());  //todo vd to be removed?
 
         registrar.registerReferenceProvider(filePattern(), createFileReferenceProvider());
+        registrar.registerReferenceProvider(filePattern3(), createFileReferenceProvider());  //todo vd in progress
         registrar.registerReferenceProvider(tagsPattern(), createTagsReferenceProvider());
     }
 
@@ -36,10 +38,23 @@ public class YamlReferenceContributor extends ReferenceContributor {
                 .withLanguage(YAMLLanguage.INSTANCE);
     }
 
+    private PsiElementPattern.Capture<YAMLQuotedText> localDefinitionsPattern2() {  //todo vd to be removed?
+        return psiElement(YAMLQuotedText.class)
+                .withParent(psiElement(YAMLKeyValue.class).withName("x-gw-runlevel"))
+                .withText(StandardPatterns.string().contains(SwaggerConstants.REFERENCE_PREFIX))
+                .andNot(StandardPatterns.string().matches(".ya?ml"))
+                .withLanguage(YAMLLanguage.INSTANCE);
+    }
+
     private PsiElementPattern.Capture<YAMLValue> filePattern() {
         return psiElement(YAMLValue.class)
                 .withText(StandardPatterns.string().matches("(.)*.ya?ml(.)*"))
                 .withLanguage(YAMLLanguage.INSTANCE);
+    }
+
+    private PsiElementPattern.Capture<YAMLValue> filePattern3() {
+        return psiElement(YAMLValue.class)
+                .withSuperParent(3, psiElement(YAMLKeyValue.class).withName("x-gw-combine"));
     }
 
     private PsiElementPattern.Capture<YAMLValue> tagsPattern() {

@@ -1,6 +1,5 @@
 package org.zalando.intellij.swagger.reference;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -34,12 +33,33 @@ public class FileReference extends PsiReferenceBase<PsiElement> {
         final String relativePath = StringUtils.substringBefore(originalRefValue, "#/");
 
         if (relativePath.equals(originalRefValue)) {
+            PsiElement element = resolveGwFileReference(originalRefValue);
+            if (element != null) {
+                return element;
+            }
+
             return resolveExactFileReference(relativePath);
         }
 
         return resolveFileReferenceWithSubPath(relativePath);
     }
 
+    private PsiElement resolveGwFileReference(String originalRefValue) {
+        if (originalRefValue.startsWith("gw.")) {
+            String fileName = null;
+            int indexOfHiphen = originalRefValue.indexOf('-');
+            if (indexOfHiphen >= 0) {
+                String substring = originalRefValue.substring(0, indexOfHiphen);
+                int indexOfLastDot = substring.lastIndexOf('.');
+                fileName = originalRefValue.substring(indexOfLastDot + 1) + ".swagger.yaml";
+            }
+            if (!StringUtils.isEmpty(fileName)) {
+                return resolveExactFileReference(fileName);
+            }
+        }
+        return null;
+    }
+    
     @Nullable
     private PsiElement resolveFileReferenceWithSubPath(String relativePath) {
         String textAfterRelativePath = StringUtils.substringAfter(originalRefValue, relativePath);
@@ -86,7 +106,7 @@ public class FileReference extends PsiReferenceBase<PsiElement> {
     public PsiElement handleElementRename(String newElementName) throws IncorrectOperationException {
         final String referencePrefix = StringUtils.substringBeforeLast(originalRefValue, "/");
 
-        if(referencePrefix.equals(originalRefValue)) {
+        if (referencePrefix.equals(originalRefValue)) {
             return super.handleElementRename(newElementName);
         }
         return super.handleElementRename(referencePrefix + SLASH + newElementName);

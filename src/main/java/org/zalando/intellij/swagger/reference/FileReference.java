@@ -20,48 +20,59 @@ import static org.zalando.intellij.swagger.reference.SwaggerConstants.SLASH;
 public class FileReference extends PsiReferenceBase<PsiElement> {
 
     private final String originalRefValue;
+    private final PsiElement psiElement;
+    private static int count = 0;
 
     public FileReference(@NotNull final PsiElement element,
                          @NotNull final String originalRefValue) {
         super(element);
         this.originalRefValue = originalRefValue;
+        this.psiElement = element;
     }
 
     @Nullable
     @Override
     public PsiElement resolve() {
+        System.out.println("############# IN RESOLVE #############");
         final String relativePath = StringUtils.substringBefore(originalRefValue, "#/");
 
         if (relativePath.equals(originalRefValue)) {
-            PsiElement element = resolveGwFileReference(originalRefValue);
-            if (element != null) {
-                return element;
-            }
-
-            return resolveExactFileReference(relativePath);
+            //            System.out.println("### originalRefValue: " + originalRefValue + " --- element: " + element);
+//            if (element != null) {
+//                System.out.println("Element is not null in resolve");
+            
+                return resolveGwFileReferenceBetter(originalRefValue);
+//            }
+//            return resolveExactFileReference(relativePath);
         }
 
         return resolveFileReferenceWithSubPath(relativePath);
     }
 
-    private PsiElement resolveGwFileReference(String originalRefValue) {
-        if (originalRefValue.startsWith("gw.")) {
-            String fileName = null;
-            int indexOfHiphen = originalRefValue.indexOf('-');
-            if (indexOfHiphen >= 0) {
-                String substring = originalRefValue.substring(0, indexOfHiphen);
-                int indexOfLastDot = substring.lastIndexOf('.');
-                fileName = originalRefValue.substring(indexOfLastDot + 1) + ".swagger.yaml";
-            }
+    private PsiElement resolveGwFileReferenceBetter(String originalRefValue) {
+        System.out.println("############# IN RESOLVE GW GW GW#############");
+
+        String containingFilePath = psiElement.getContainingFile().getVirtualFile().getPath();
+
+        //todo we need to check a few things here
+        // first is that the containing file  path should match config/integration/apis
+        // second is the value should not end with .yaml 
+        //third is the value directory path should be relative to config/integration/apis
+        if (containingFilePath.matches(".*config[\\/]integration.*") && !originalRefValue.endsWith("yaml")) {
+            String fileName = new GwVicky().resolveGwFileReference(originalRefValue, containingFilePath);
             if (!StringUtils.isEmpty(fileName)) {
                 return resolveExactFileReference(fileName);
             }
+            System.out.println("returning null");
+            return null;
+        } else {
+            return resolveExactFileReference(originalRefValue);
         }
-        return null;
     }
-    
+
     @Nullable
-    private PsiElement resolveFileReferenceWithSubPath(String relativePath) {
+    public PsiElement resolveFileReferenceWithSubPath(String relativePath) {
+        System.out.println("############# IN RESOLVE FILEREF with SUBPATH #############");
         String textAfterRelativePath = StringUtils.substringAfter(originalRefValue, relativePath);
         final String pathExpression = Arrays.stream(
                 textAfterRelativePath
@@ -77,6 +88,8 @@ public class FileReference extends PsiReferenceBase<PsiElement> {
 
     @Nullable
     private PsiElement resolveExactFileReference(String relativePath) {
+        System.out.println("############# IN RESOLVE EXACT FILE REF #############");
+        System.out.println("#######In resolve ExactFileReference: relativePath is: " + count++ + ": " + relativePath);
         return getReferencedFile(relativePath)
                 .flatMap(referencedFile -> new PathFinder().findByPathFrom("$", referencedFile))
                 .orElse(null);

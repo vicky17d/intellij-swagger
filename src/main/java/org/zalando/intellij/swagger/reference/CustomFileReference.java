@@ -1,119 +1,78 @@
 package org.zalando.intellij.swagger.reference;
 
+import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.zalando.intellij.swagger.traversal.path.PathFinder;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class CustomFileReference extends FileReference {
     private final String originalRefValue;
-//    private final PsiElement psiElement;  //todo vd .. change to getElement()
+    private final PsiElement psiElement;
 
     public CustomFileReference(@NotNull PsiElement element, @NotNull String originalRefValue) {
         super(element, originalRefValue);
         this.originalRefValue = originalRefValue;
+        this.psiElement = element;
     }
 
     @Nullable
     @Override
     public PsiElement resolve() {
-        final String relativePath = StringUtils.substringBefore(originalRefValue, "#/");
-
-        if (relativePath.equals(originalRefValue)) {
-            return resolveCustomReference(originalRefValue, getElement());
-        }
-
-        return resolveFileReferenceWithSubPath(relativePath);
+        return resolveCustomReference(originalRefValue, psiElement);
     }
 
 
-    public PsiElement resolveCustomReference(String originalRefValue, PsiElement psiElement) {
+    private PsiElement resolveCustomReference(String originalRefValue, PsiElement psiElement) {
         String containingFilePath = psiElement.getContainingFile().getVirtualFile().getPath();
+
 
         //todo we need to check a few things here
         // first is that the containing file  path should match config/integration/apis
         // second is the value should not end with .yaml 
         //third is the value directory path should be relative to config/integration/apis
-        if (containingFilePath.matches(".*config[\\/]integration[\\/].*") && !originalRefValue.endsWith("yaml")) {
-            String fileName = resolveGwFileReference(originalRefValue, containingFilePath);
-            if (!StringUtils.isEmpty(fileName)) {
-                return resolveExactFileReference(fileName);
-            }
-            return null;
-        } else {
-            return resolveExactFileReference(originalRefValue);
-        }
-    }
-
-    @Nullable
-    private PsiElement resolveExactFileReference(String relativePath) {
-        return getReferencedFile(relativePath)
-                .flatMap(referencedFile -> new PathFinder().findByPathFrom("$", referencedFile))
-                .orElse(null);
-    }
-
-    @Nullable
-    private PsiElement resolveFileReferenceWithSubPath(String relativePath) {
-        String textAfterRelativePath = StringUtils.substringAfter(originalRefValue, relativePath);
-        final String pathExpression = Arrays.stream(
-                textAfterRelativePath
-                        .substring(2)
-                        .split("/"))
-                .map(s -> s.replace(".", "\\."))
-                .collect(Collectors.joining(".", "$.", ""));
-
-        return getReferencedFile(relativePath)
-                .flatMap(referencedFile -> new PathFinder().findByPathFrom(pathExpression, referencedFile))
-                .orElse(null);
-    }
-
-    private Optional<PsiFile> getReferencedFile(final String relativePath) {
-
-        final Optional<VirtualFile> baseDir = Optional.ofNullable(getElement())
-                .map(PsiElement::getContainingFile)
-                .map(PsiFile::getVirtualFile)
-                .map(VirtualFile::getParent);
-
-        final PsiManager psiManager = PsiManager.getInstance(getElement().getProject());
-
-        return baseDir
-                .map(dir -> dir.findFileByRelativePath(relativePath))
-                .map(psiManager::findFile);
-    }
-
-    public String resolveGwFileReference(String originalRefValue, String containingFilePath) {
-        YamlValuePath yamlValuePath = new YamlValuePath(originalRefValue);
-        if (StringUtils.isEmpty(originalRefValue)) {
-            return null;
-        }
-        boolean gwFile = containingFilePath.matches(".*config[\\/]integration[\\/]apis[\\/].*");  //todo 1 vd add apis?? done
-        if (gwFile && !originalRefValue.endsWith(".yaml")) {
-            String relativeLocationOfContainingFile = containingFilePath.substring(containingFilePath.indexOf("integration/api") + "integration/api/".length() + 1, containingFilePath.lastIndexOf("/"));   //todo 2 vd Use groups here.. also take care of windows stuff here
-            //todo 3 vd.. also change api to apis in the above line
-
-            String valueParentPath = yamlValuePath.getParentPath();
-
+        if (containingFilePath.matches(".*config[\\/]integration[\\/]apis[\\/].*") && !originalRefValue.endsWith("yaml")) {
+            YamlValuePath yamlValuePath = new YamlValuePath(originalRefValue);
             String fileName = yamlValuePath.getFileName();
-            if (StringUtils.isEmpty(valueParentPath)) {
-                return fileName;
-            } else {
-                Path relativize = Paths.get(relativeLocationOfContainingFile).relativize(Paths.get(valueParentPath));
 
-                String valueFileName = StringUtils.isEmpty(relativize.toString()) ? fileName : relativize + "/" + fileName;
 
-                if (!StringUtils.isEmpty(valueFileName)) {
-                    return valueFileName;
+            PsiFile containingFile = psiElement.getContainingFile();
+            PsiDirectory containingDirectory = containingFile.getParent();
+            if (containingDirectory != null) {
+                System.out.println("We have found the direcotry: " + containingDirectory);      //this is coming as as the directory of the containingfile.. good
+                
+                final ProjectRootManager projectRootManager = ProjectRootManager.getInstance(psiElement.getProject());
+                final VirtualFile root = projectRootManager.getFileIndex().getContentRootForFile(containingDirectory.getVirtualFile());
+                System.out.println("Root/Module: ......" + root);
+                if (root != null) {
                 }
+                
+            }
+
+
+            final PsiManager psiManager = PsiManager.getInstance(getElement().getProject());
+
+            
+            if (containingDirectory != null ) {
+                System.out.println("Here trying to find out the psiFile..");
+                PsiFile psiFile = containingDirectory.findFile(fileName);
+                if (psiFile != null) {
+                    System.out.println("psiFile: " + psiFile.getName());
+                    if (psiFile.getVirtualFile() != null) {
+                        System.out.println("Target found. #########..");
+                        VirtualFile virtualFile = psiFile.getVirtualFile();
+                        System.out.println();
+                        return psiManager.findFile(virtualFile);
+                    } else {
+                        System.out.println("Target not found..so fall back to the containing directory");
+                        return psiManager.findFile(containingDirectory.getVirtualFile());
+                    }
+                }
+
+                System.out.println("################# Did not work out.. #################");  //todo vd.. add this to logger
             }
 
         }

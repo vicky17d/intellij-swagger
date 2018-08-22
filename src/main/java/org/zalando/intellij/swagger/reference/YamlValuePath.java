@@ -52,7 +52,7 @@ public class YamlValuePath {
 
     public String getParentPath() {
         if (!StringUtils.isEmpty(getParentPathOriginal())) {
-            return getParentPathOriginal().replace(".", "/");     //todo vd .. this needs to be fixed... does not work if hte path has ../../ in the path
+            return getParentPathOriginal().replace(".", "/");     //todo vd .. this needs to be fixed... does not work if hte path has ../../ in the path  -- it is probably ok because there are naming standards and path standards
         } else {
             return EMPTY;  //todo vd null or emptly???
         }

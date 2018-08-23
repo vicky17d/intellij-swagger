@@ -3,6 +3,7 @@ package org.zalando.intellij.swagger.reference;
 import com.intellij.patterns.PsiElementPattern;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiReferenceContributor;
 import com.intellij.psi.PsiReferenceProvider;
 import com.intellij.psi.PsiReferenceRegistrar;
 import com.intellij.util.ProcessingContext;
@@ -16,11 +17,11 @@ import java.util.Optional;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 
-public class YamlCustomReferenceContributor extends ReferenceContributor {
+public class YamlCustomReferenceContributor extends PsiReferenceContributor {
 
-    public YamlCustomReferenceContributor() {
-        super(new YamlTraversal());
-    }
+//    public YamlCustomReferenceContributor() {
+//        super(new YamlTraversal());
+//    }
 
     @Override
     public void registerReferenceProviders(@NotNull final PsiReferenceRegistrar registrar) {

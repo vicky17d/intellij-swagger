@@ -57,4 +57,8 @@ public class YamlValuePath {
             return EMPTY;  //todo vd null or emptly???
         }
     }
+    
+    public String getFullPath() {
+        return "config/integration/apis/" + getParentPath() + "/" + getFileName();  //todo vd change to use path rather than adding slashes yourself.. also use it in CustomFileReference
+    }
 }
